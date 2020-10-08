@@ -37,8 +37,8 @@ sample_bgen <- sample_bgen[c(15:nrow(sample_bgen)),]
 
 ############# The function calc_chrn_pain calculates the number of chronic pain sites:
 
-calc_chrn_pain <- function(pain_in){
-
+calc_chrn_pain_updt <- function(pain_in){
+  
   # select only columns that matter:
   col <- c('IID', 'Prf_no_Ansr_v0', 'Non_Abve_v0', names(pain_in)[which(grepl("m_v0", names(pain_in)))])
   pain_in <- pain_in[,..col]
@@ -48,7 +48,7 @@ calc_chrn_pain <- function(pain_in){
                       "Neck_Shldr_pn_3m_v0", "Hip_pn_3m_v0",        
                       "Back_pn_3m_v0", "Stom_Abdmn_pn_3m_v0",
                       "Knee_pn_3m_v0", "Headch_3m_v0", "Face_pn_3m_v0")
-                      
+  
   # extract only the people who gave an answer to the pain questions: 
   pain_in <- pain_in[Prf_no_Ansr_v0 == 0,]
   
@@ -63,21 +63,22 @@ calc_chrn_pain <- function(pain_in){
     else if(max(r) == 0 & min(r) == 0){ return(0) }
     else { return(NA) }
   }
-  
+    
   # starting the construction of the chronic pain phenotype:
   # take only the IID from the pain_ table
   chrn_pain <-pain_in[, .(IID)]
   
   # indx are the indexes of the headers that refer to 3 month pain:
   indx <- which(grepl("_3m_", names(pain_in)))
-  # calculate the number and add the column of count of chronic pain siates for each sample:
+  
+  # calculate the number of chronic pain siates for each sample and add the results as a column :
   chrn_pain <- data.table(chrn_pain, count_pain_sites_3m_v0=apply(pain_in, 1, num_sites))
   
   # Add an FID column
   pain_in <- chrn_pain[ ,.(IID)]
   names(pain_in) <- 'FID'
   chrn_pain <- bind_cols(pain_in, chrn_pain)
-
+  
   return(chrn_pain)
   
 } 
@@ -85,24 +86,30 @@ calc_chrn_pain <- function(pain_in){
 #############################################################################################
 
 
-########################## Master table of complete UKB sample, chronic pain ###################
+########################## Master table, complete UKB sample chronic pain ###################
+
+#pain_ <- calc_chrn_pain_updt(pain)
+#pain_ <- pain_[!is.na(count_pain_sites_3m_v0),]
+#pain_ <- inner_join(pain_, eur, by='IID')
+#cov <- cov[,c(1,2,6,9,10,c(12:51))]
+#pheno_ast_pain <- left_join(pain_, cov, by=c('IID'))
 
 pheno_ast_pain <- calc_chrn_pain_updt(pain)
 pheno_ast_pain <- pheno_ast_pain[!is.na(count_pain_sites_3m_v0), ]
-cov <- cov[,c(1,2,6,9,10,c(12:51))]
-pheno_ast_pain <- left_join(pheno_ast_pain, cov, by=c('IID'))
 
 #############################################################################################
 
-################# COMPLETE Master table, complete UKB sample asthma and chronic pain ########
+################# COMPLETE Master table for full non na UKB sample asthma and chronic pain ##
 cols <- c('IID', names(a)[(which(grepl('_v0', names(a) )))])
 a <- a[!is.na(Asthma_v0), ..cols]
 a[, Asthma_Age_8_v0:=ifelse(Asthma_v0 == 0, 0, 
                             ifelse(Asthma_Age_4_v0 == 1 | Asthma_Age_6_v0 == 1, 1, NA))]
  
-pheno_ast_pain <- as.data.table( full_join(a, pheno_ast_pain, by=c('IID')) )
-cols <- c(7, c(1:6), c(8:ncol(pheno_ast_pain)))
-pheno_ast_pain <- pheno_ast_pain[, ..cols]
+pheno_ast_pain <- as.data.table( full_join(pheno_ast_pain, a, by=c('IID')) )
+pheno_ast_pain <- pheno_ast_pain[order(IID), ]
+
+cov <- cov[,c(1,2,6,9,10,c(12:51))]
+pheno_ast_pain <- left_join(pheno_ast_pain, cov, by=c('IID'))
 
 #############################################################################################
 
@@ -112,7 +119,7 @@ pain_ast_sample_bgen <- inner_join(pheno_ast_pain, sample_bgen, by='IID')
 
 #############################################################################################
 
-##########################  Table,  EUR bgen sample chronic pain ######################
+##########################  Table,  EUR bgen sample chronic pain ############################
 
 pain_ast_EUR_bgen <- inner_join(pheno_ast_pain, eur, by='IID')
 
@@ -133,6 +140,7 @@ write.table(pain_EUR_bgen_women,
             path_to_output_table1,
             append = FALSE, sep = "\t", quote = FALSE, col.names=TRUE, row.names=FALSE)
 
+check <- fread(path_to_output_table)
 View(fread(path_to_output_table))
 
 
