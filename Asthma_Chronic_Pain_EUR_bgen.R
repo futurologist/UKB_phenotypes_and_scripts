@@ -15,8 +15,6 @@ path_to_covariates <- "E:\\Genomics\\Resources\\Output_data_ph2\\demogr_geno.txt
 
 path_to_output_table <- "E:\\Genomics\\Resources\\Asthma_and_Chronic_Pain\\pheno_cov_a4568_mcp_bgen_eur.txt" 
 
-#path_to_output_table1 <- "E:\\Genomics\\Resources\\Chronic_Pain\\Pheno_bgen_sample_eur_women\\Pheno_chrn_pain_bgen_eur_women.txt" 
-
 
 ############# NOW RUN THE WHOLE SCRIPT: ########################################################
 
