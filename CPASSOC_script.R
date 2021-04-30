@@ -21,8 +21,6 @@ in_file_2 <- "path to second qc filtered SIAGE summary stats file "
 # QC-Filtering script: lustre03/project/6048803/UKBiobank/QC_filters/EUR_QC_filters/EUR_QC_filtering_script.sh
 
 
-
-gc()
 f_1 <- fread(in_file_1)
 N_1 <- f_1[1, N]
 f_1 <- f_1[,.(rsid, CHR, POS, Allele1, Allele2, BETA, SE, p_value)]
