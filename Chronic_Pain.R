@@ -106,7 +106,7 @@ calc_chrn_pain_updt <- function(pain_in){
   # calculate the number of chronic pain sites for each sample:
   # chrn_pain[, 'count_pain_sites_3m_v0'] <- as.data.table(apply(pain_, 1, num_sites))
   # Add an FID column
-  pain_in <- select(chrn_pain, IID)
+  pain_in <- chrn_pain[, .(IID)]
   names(pain_in) <- 'FID'
   chrn_pain <- bind_cols(pain_in, chrn_pain)
   #names(chrn_pain)[c(1,2)] <- c('FID','IID')
